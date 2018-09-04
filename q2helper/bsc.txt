@@ -1,0 +1,65 @@
+# Setup
+c-->from imp import reload
+c-->import q2solution
+c-->reload(q2solution)
+c-->from q2solution import pages, expand_re
+c-->import re
+# Read/Test Regular Expression Pattern (read from pattern.txt)
+c-->p = open('pattern.txt').read().rstrip()
+c-->print('   Testing the pattern: ',p)
+
+# The following text should match the pattern
+!=-->re.match(p,'3')-->None
+!=-->re.match(p,'1000')-->None
+!=-->re.match(p,'15-20')-->None
+!=-->re.match(p,'20-15')-->None
+!=-->re.match(p,r'10-20/2')-->None
+!=-->re.match(p,r'1-1000/20')-->None
+
+# The following text should NOT match the pattern
+==-->re.match(p,' 3')-->None
+==-->re.match(p,'03')-->None
+==-->re.match(p,'2 43')-->None
+==-->re.match(p,'2x3')-->None
+==-->re.match(p,'23x')-->None
+==-->re.match(p,'15 - 20')-->None
+==-->re.match(p,'15--30')-->None
+==-->re.match(p,'15-03')-->None
+==-->re.match(p,'15-20-30')-->None
+==-->re.match(p,'1 5-20')-->None
+==-->re.match(p,'15-2 0')-->None
+==-->re.match(p,r'15-/20')-->None
+==-->re.match(p,r'15-/02')-->None
+==-->re.match(p,r'15/2-2')-->None
+==-->re.match(p,r'15/10/2')-->None
+
+# Testing pages
+# The following calls should produce the results shown
+e-->pages('5')-->[5]
+e-->pages('5,6,8,6')-->[5, 6, 8]
+e-->pages('5-8')-->[5, 6, 7, 8]
+e-->pages('5-8,9,11-13')-->[5, 6, 7, 8, 9, 11, 12, 13]
+e-->pages(r'1-10/1')-->[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+e-->pages(r'1-10/2')-->[1, 3, 5, 7, 9]
+e-->pages(r'1-10/3')-->[1, 4, 7, 10]
+e-->pages(r'4-6,8,11-20/2,11-20/3,10')-->[4, 5, 6, 8, 10, 11, 13, 14, 15, 17, 19, 20]
+# The following calls should raise exceptions
+^-->pages('05')-->AssertionError
+^-->pages('05-6')-->AssertionError
+^-->pages('6-05')-->AssertionError
+^-->pages('7-4')-->AssertionError
+^-->pages('5,,5')-->AssertionError
+^-->pages('5-/5')-->AssertionError
+^-->pages('5/05')-->AssertionError
+^-->pages('5/2-8')-->AssertionError
+
+# Testing expand_re
+c-->pd = dict(digit=r'\d', integer=r'[=-]?#digit##digit#*')
+c-->expand_re(pd)
+==-->dict(pd.items())-->{'digit': '\\d', 'integer': '[=-]?(\\d)(\\d)*'}
+c-->pd = dict(integer=r'[+-]?\d+', integer_range =r'#integer#(..#integer#)?', integer_list  =r'#integer_range#(?,#integer_range#)*', integer_set =r'{#integer_list#?}')
+c-->expand_re(pd)
+==-->dict(pd.items())-->{'integer' : '[+-]?\\d+', 'integer_range': '([+-]?\\d+)(..([+-]?\\d+))?', 'integer_list' : '(([+-]?\\d+)(..([+-]?\\d+))?)(?,(([+-]?\\d+)(..([+-]?\\d+))?))*','integer_set'  : '{((([+-]?\\d+)(..([+-]?\\d+))?)(?,(([+-]?\\d+)(..([+-]?\\d+))?))*)?}'}
+c-->pd = pd = dict(a='correct',b='#a#',c='#b#',d='#c#',e='#d#',f='#e#',g='#f#')
+c-->expand_re(pd)
+==-->dict(pd.items())-->{'d': '(((correct)))', 'c': '((correct))', 'b': '(correct)','a': 'correct', 'g': '((((((correct))))))', 'f': '(((((correct)))))','e': '((((correct))))'}

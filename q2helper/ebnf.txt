@@ -1,0 +1,5 @@
+page_sequence <= non-0-digit{integer}[-non-0-digit{integer}[/non-0-digit{integer}]]
+pages         <= page_sequence{,page_sequence}
+#note page sequence has optional statement in an optional statement
+#non-0-digit = [1-9]
+#integer = [1-9]{0-9}
